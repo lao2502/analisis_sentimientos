@@ -112,7 +112,7 @@ positivas$words <- row.names(positivas) #crea variable que se llame words
 colnames(positivas) <- c("frecuencia","Palabras")
 table(positivas)
 
-# Crear nube de palabras
+# Crear una nube de palabras
 # Se debe cargar: 
 # library(wordcloud)
 # library("RColorBrewer")
