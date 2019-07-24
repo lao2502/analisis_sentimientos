@@ -1,0 +1,129 @@
+# install.packages("tm")
+# install.packages("SnowballC")
+# install.packages("caTools")
+# install.packages("caret")
+# install.packages("e1071")
+# install.packages("plyr")
+# install.packages("wordcloud")
+# install.packages("RColorBrewer")
+
+library(tm) # para mineria de texto
+library(SnowballC) # para reducir una palabra a su raíz
+library(caTools) 
+library(caret)
+library(e1071)
+library(plyr)
+library(wordcloud)
+library(RColorBrewer)
+
+# posicionamiento del directorio de trabajo
+
+
+setwd("D:/Estudios/UNAD/Trabajo de grado/Proyecto final/Proyecto R-Twitter/Dataset")
+ 
+#retorna el directorio sobre el cual se esta trabajando
+
+getwd()
+
+
+importdata <- read.csv("Prueba1.csv", sep =";") #cargar los datos al objeto tweets ("nombre del archivo.csv", separador)
+table(importdata$sentiment) #Cuantos tweets positivos y negativos hay
+Corpus= Corpus(VectorSource(importdata$text)) #objeto corpus se le asigna el objeto de tweets // lee los tweets
+length(Corpus) #cuenta las palabras tiene el corpus
+content(Corpus[[500]]) #imprime la posicion 500
+
+#Preprocesamiento
+
+# Corpus <- tm_map(Corpus, gsub("[[:cntrl:]]", " "))  # Eliminar caracteres especiales de la codificaci?n, como saltos de l?nea y tabulaciones
+# Corpus <- tm_map(tolower(Corpus))  # cambia las palabras a minusculas
+# Corpus <- tm_map(removeWords(Corpus, words = stopwords("spanish"))) # eliminar palabras vacias, preposiciones y muletillas
+# Corpus <- tm_map(removePunctuation(Corpus)) #Elimna la puntuacion
+# Corpus <- tm_map(removeNumbers(Corpus)) #Elimna numeros
+# Corpus <- tm_map(stripWhitespace(Corpus)) # Elimina espacios vacios excesivos
+# Corpus <- tm_map(stemDocument(Corpus)) #acorta las palabras a su raiz "devolvieron" "devolver"
+
+
+#Corpus <- tm_map(Corpus, PlainTextDocument)  # vuelve el corpus normal para poder visualizarlo
+removeURL <- content_transformer(function(x) gsub("(f|ht)tp(s?)://\\S+", "", x, perl=T)) # funci?n para eliminar http
+Corpus <- tm_map(Corpus, removeURL) # Elimina las palabras que empiezan por "http." seguidas de cualquier cosa que no sea un espacio)
+content(Corpus[[4]]) #imprime la posicion 500
+Corpus <- tm_map(Corpus, removePunctuation) #quita la puntuacion
+content(Corpus[[6]]) #imprime la posicion 500
+Corpus <- tm_map(Corpus, removeNumbers) #quita los numeros
+content(Corpus[[6]]) #imprime la posicion 500
+Corpus <- tm_map(Corpus, content_transformer(tolower)) #procesamiento cambia las palabras a minusculas
+content(Corpus[[6]]) #imprime la posicion 500
+stopwords("spanish")[1:50] #preposiciones etc... [1:50] imprime las 50 primeras / stopwords("spanish")
+Corpus <- tm_map(Corpus, removeWords, c(stopwords("spanish"), "las", "tendencias")) #remueve las stopwords y otras palabras que se deseen
+content(Corpus[[6]]) #imprime la posicion 500
+Corpus <- tm_map(Corpus, stemDocument,language="spanish")  #acorta las palabras a su raiz "devolvieron" "devolver"
+content(Corpus[[6]]) #imprime la posicion 500
+Corpus <- tm_map(Corpus, stripWhitespace) #quita los espacios vacios excesivos
+content(Corpus[[6]]) #imprime la posicion 500
+
+#clasificaci?n
+
+frequencies <- DocumentTermMatrix(Corpus)  #crear matriz de palabras
+frequencies #imprime atributos de frequencies de la matriz; Documents= Filas -twetts, terms= palabras - columnas
+inspect(frequencies[15:20, 5:10]) #zoop de la matriz / posiciones [15:20, 5:10]
+findFreqTerms(frequencies, lowfreq = 50) # Ver Palabras con mayor frecuencias -- iguales o mayores a 50
+sparse <- removeSparseTerms(frequencies, 0.995) #quitar palabras que son mencionadas muy poco / deja las palabras mas usadas
+sparse #imprime sparse  -- sparce=palabras que aparecen poco
+tweetsSparse <- as.data.frame(as.matrix(sparse)) # retornar la variable sparse como una base de datos en formato R
+colnames(tweetsSparse) = make.names(colnames(tweetsSparse)) #asinar los nombres de cada palabra al dataframe
+tweetsSparse$sentiment <- importdata$sentiment #examina con la base de datos de sentimientos precargada
+
+#modelo de clasificaci?n 
+#Objetivo: Encontrar  un hiperplano h de dimension (n-1) que separe los ejemplos etiquetados con -1 de los etiquetados con +1 
+#con un "margen maximo" (P).
+#los SVM buscan los puntos mas cercanos entre varias clases. Estos puntos se llaman "los vectores de soporte"
+#SVM luego declara que la mejor linea de separaci?n va a ser la linea que divide las dos clases y que al mismo tiempo 
+#maximiza la distancia del hiperplano a los vectores de soporte (r)
+#Ecuaci?n del hiperplano: WX+b=0
+#Problema de optimizaci?n: Encuentre W y b  tal que  P=2/[[W]]
+
+#partir la base de datos en entrenamiento y evaluaci?n 
+#(entrenamiento: ense?arle a la BD como funcionar, evaluaci?n: evaluar como lo hace el modelo y su poder de predicci?n)
+
+set.seed(12)
+split <- sample.split(tweetsSparse$sentiment, SplitRatio = 0.8) #decide que observaciones se van para un lado u otro
+#plitRatio= 0.8 / el 805 se va a entrenamiento
+trainSparse = subset(tweetsSparse, split==TRUE) #particion modelo de entrenamiento
+TestSparse = subset(tweetsSparse, split==FALSE) #particion  modelo de evaluaci?n
+table(TestSparse$sentiment)
+165/328
+#algoritmo de clasificacion
+
+# Se debe cargar: library(caret); library(e1071), library(plyr)
+
+SVM <- svm(as.factor(sentiment)~ ., data=trainSparse)  # Entrena al modelo soporte vector machine
+summary(SVM) #Describe el modelo
+predictSVM <- predict(SVM, newdata = TestSparse)
+confusionMatrix(predictSVM,as.factor(TestSparse$sentiment)) #evaluar el desempe?o de los tweets
+
+# ahora se va a crear una nube con las palabras mas repetidas 
+
+
+positive <- subset(tweetsSparse, tweetsSparse$sentiment==1) #crea base de datos de tweets positivos
+positive$sentiment <- NULL # Eliminamos la variable sentiment porque no se necesita en la nube de palabras
+
+positivas <- as.data.frame(colSums(positive)) #generar frecuencias de las palabras positivas -- suma de columnas (cada palabra)
+positivas$words <- row.names(positivas) #crea variable que se llame words
+colnames(positivas) <- c("frecuencia","Palabras")
+table(positivas)
+
+# Crear nube de palabras
+# Se debe cargar: 
+# library(wordcloud)
+# library("RColorBrewer")
+
+wordcloud(positivas$Palabras, positivas$frecuencia, random.order = FALSE, colors = brewer.pal(8,"Dark2"), max.words = 300)
+
+# Crear histograma de frecuencia de palabras
+
+hist(positivas$frecuencia, main ="Frecuencia de palabras positivas", xlab = "Palabras más utilizadas" , ylab = "Frecuencia", col ="light blue",breaks = "Sturges")
+
+# Muestra resumen = valor min, máximo; mediana, moda; 1 y 3 quartil
+summary(positivas)
+# tweets_tidy %>%  ggplot(aes(x = Palabras)) + geom_bar() + coord_flip() + theme_bw() 
+
