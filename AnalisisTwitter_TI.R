@@ -4,8 +4,11 @@
 # install.packages("caret")
 # install.packages("e1071")
 # install.packages("plyr")
+#install.packages("magrittr") # Solo se necesita la primera vez que lo usas.
+#install.packages("dplyr")    # Instalación alternativa del%>%
 # install.packages("wordcloud")
 # install.packages("RColorBrewer")
+#install.packages("ggplot2")
 
 library(tm) # para mineria de texto
 library(SnowballC) # para reducir una palabra a su raíz
@@ -13,8 +16,11 @@ library(caTools)
 library(caret)
 library(e1071)
 library(plyr)
+library(magrittr) # need to run every time you start R and want to use %>%
+library(dplyr)    # alternative, this also loads %>%
 library(wordcloud)
 library(RColorBrewer)
+library(ggplot2)
 
 # posicionamiento del directorio de trabajo
 
@@ -27,6 +33,7 @@ getwd()
 
 
 importdata <- read.csv("Prueba1.csv", sep =";") #cargar los datos al objeto tweets ("nombre del archivo.csv", separador)
+
 table(importdata$sentiment) #Cuantos tweets positivos y negativos hay
 Corpus= Corpus(VectorSource(importdata$text)) #objeto corpus se le asigna el objeto de tweets // lee los tweets
 length(Corpus) #cuenta las palabras tiene el corpus
@@ -107,7 +114,7 @@ confusionMatrix(predictSVM,as.factor(TestSparse$sentiment)) #evaluar el desempe?
 positive <- subset(tweetsSparse, tweetsSparse$sentiment==1) #crea base de datos de tweets positivos
 positive$sentiment <- NULL # Eliminamos la variable sentiment porque no se necesita en la nube de palabras
 
-positivas <- as.data.frame(colSums(positive)) #generar frecuencias de las palabras positivas -- suma de columnas (cada palabra)
+positivas <- as.data.frame(colSums(positive) %>% sort(decreasing = TRUE)) #generar frecuencias de las palabras positivas -- suma de columnas (cada palabra)
 positivas$words <- row.names(positivas) #crea variable que se llame words
 colnames(positivas) <- c("frecuencia","Palabras")
 table(positivas)
@@ -122,6 +129,17 @@ wordcloud(positivas$Palabras, positivas$frecuencia, random.order = FALSE, colors
 # Crear histograma de frecuencia de palabras
 
 hist(positivas$frecuencia, main ="Frecuencia de palabras positivas", xlab = "Palabras más utilizadas" , ylab = "Frecuencia", col ="light blue",breaks = "Sturges")
+
+#Gráficas de frecuencia
+
+
+
+positivas[1:10, ] %>%
+  ggplot(aes(Palabras, frecuencia)) +
+  geom_bar(stat = "identity", color = "black", fill = "#87CEFA") +
+  geom_text(aes(hjust = 1.3, label = frec)) + 
+  coord_flip() + 
+  labs(title = "Diez palabras más frecuentes en Niebla",  x = "Palabras", y = "Número de usos")
 
 # Muestra resumen = valor min, máximo; mediana, moda; 1 y 3 quartil
 summary(positivas)

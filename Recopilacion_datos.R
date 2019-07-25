@@ -33,3 +33,4 @@ setwd("D:/Estudios/UNAD/Trabajo de grado/Proyecto final/Proyecto R-Twitter/Datas
 #Exportando datos 
 
 write.csv(Lista, file="bd_descarga.csv",row.names = F)
+
