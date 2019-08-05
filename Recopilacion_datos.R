@@ -20,7 +20,7 @@ access_secret <- "GVB3RzuGzK9tUiGHttiWpCJK1eKTn0L9eNuMwPngmcZr5"
 setup_twitter_oauth(consumer_key, consumer_secret, access_token, access_secret)
 
 #Seleccionamos tweets o la busqueda a realizar 
-consulta <- searchTwitter("empleo sistemas", n=1000)
+consulta <- searchTwitter("seguridad sistemas", n=1000)
 
 #Creando un dataset de los datos obtenidos 
 

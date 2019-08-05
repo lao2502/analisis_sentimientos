@@ -13,8 +13,8 @@
 library(tm) # para mineria de texto
 library(SnowballC) # para reducir una palabra a su raíz
 library(caTools) 
-library(caret)
-library(e1071)
+library(caret) # ordenar datos
+library(e1071) # machine learning
 library(plyr)
 library(magrittr) # need to run every time you start R and want to use %>%
 library(dplyr)    # alternative, this also loads %>%
@@ -32,12 +32,12 @@ setwd("D:/Estudios/UNAD/Trabajo de grado/Proyecto final/Proyecto R-Twitter/Datas
 getwd()
 
 
-importdata <- read.csv("Prueba1.csv", sep =";") #cargar los datos al objeto tweets ("nombre del archivo.csv", separador)
+importdata <- read.csv("Prueba2.csv", sep =";") #cargar los datos al objeto tweets ("nombre del archivo.csv", separador)
 
 table(importdata$sentiment) #Cuantos tweets positivos y negativos hay
 Corpus= Corpus(VectorSource(importdata$text)) #objeto corpus se le asigna el objeto de tweets // lee los tweets
 length(Corpus) #cuenta las palabras tiene el corpus
-content(Corpus[[500]]) #imprime la posicion 500
+content(Corpus[[50]]) #imprime la posicion 50
 
 #Preprocesamiento
 
@@ -50,23 +50,23 @@ content(Corpus[[500]]) #imprime la posicion 500
 # Corpus <- tm_map(stemDocument(Corpus)) #acorta las palabras a su raiz "devolvieron" "devolver"
 
 
-#Corpus <- tm_map(Corpus, PlainTextDocument)  # vuelve el corpus normal para poder visualizarlo
-removeURL <- content_transformer(function(x) gsub("(f|ht)tp(s?)://\\S+", "", x, perl=T)) # funci?n para eliminar http
+Corpus <- tm_map(Corpus, PlainTextDocument)  # vuelve el corpus normal para poder visualizarlo
+#removeURL <- content_transformer(function(x) gsub("(f|ht)tp(s?)://\\S+", "", x, perl=T)) # funci?n para eliminar http
 Corpus <- tm_map(Corpus, removeURL) # Elimina las palabras que empiezan por "http." seguidas de cualquier cosa que no sea un espacio)
-content(Corpus[[4]]) #imprime la posicion 500
+content(Corpus[[50]]) #imprime la posicion 50
 Corpus <- tm_map(Corpus, removePunctuation) #quita la puntuacion
-content(Corpus[[6]]) #imprime la posicion 500
+content(Corpus[[50]]) #imprime la posicion 50
 Corpus <- tm_map(Corpus, removeNumbers) #quita los numeros
-content(Corpus[[6]]) #imprime la posicion 500
+content(Corpus[[50]]) #imprime la posicion 50
 Corpus <- tm_map(Corpus, content_transformer(tolower)) #procesamiento cambia las palabras a minusculas
-content(Corpus[[6]]) #imprime la posicion 500
+content(Corpus[[50]]) #imprime la posicion 50
 stopwords("spanish")[1:50] #preposiciones etc... [1:50] imprime las 50 primeras / stopwords("spanish")
 Corpus <- tm_map(Corpus, removeWords, c(stopwords("spanish"), "las", "tendencias")) #remueve las stopwords y otras palabras que se deseen
-content(Corpus[[6]]) #imprime la posicion 500
+content(Corpus[[50]]) #imprime la posicion 50
 Corpus <- tm_map(Corpus, stemDocument,language="spanish")  #acorta las palabras a su raiz "devolvieron" "devolver"
-content(Corpus[[6]]) #imprime la posicion 500
+content(Corpus[[50]]) #imprime la posicion 50
 Corpus <- tm_map(Corpus, stripWhitespace) #quita los espacios vacios excesivos
-content(Corpus[[6]]) #imprime la posicion 500
+content(Corpus[[50]]) #imprime la posicion 50
 
 #clasificaci?n
 
@@ -114,7 +114,7 @@ confusionMatrix(predictSVM,as.factor(TestSparse$sentiment)) #evaluar el desempe?
 positive <- subset(tweetsSparse, tweetsSparse$sentiment==1) #crea base de datos de tweets positivos
 positive$sentiment <- NULL # Eliminamos la variable sentiment porque no se necesita en la nube de palabras
 
-positivas <- as.data.frame(colSums(positive) %>% sort(decreasing = TRUE)) #generar frecuencias de las palabras positivas -- suma de columnas (cada palabra)
+positivas <- as.data.frame(colSums(positive)) #generar frecuencias de las palabras positivas -- suma de columnas (cada palabra)
 positivas$words <- row.names(positivas) #crea variable que se llame words
 colnames(positivas) <- c("frecuencia","Palabras")
 table(positivas)
@@ -134,12 +134,12 @@ hist(positivas$frecuencia, main ="Frecuencia de palabras positivas", xlab = "Pal
 
 
 
-positivas[1:10, ] %>%
-  ggplot(aes(Palabras, frecuencia)) +
-  geom_bar(stat = "identity", color = "black", fill = "#87CEFA") +
-  geom_text(aes(hjust = 1.3, label = frec)) + 
-  coord_flip() + 
-  labs(title = "Diez palabras más frecuentes en Niebla",  x = "Palabras", y = "Número de usos")
+# positivas[1:10, ] %>%
+#   ggplot(aes(Palabras, frecuencia)) +
+#   geom_bar(stat = "identity", color = "black", fill = "#87CEFA") +
+#   geom_text(aes(hjust = 1.3, label = frec)) + 
+#   coord_flip() + 
+#   labs(title = "Diez palabras más frecuentes en Niebla",  x = "Palabras", y = "Número de usos")
 
 # Muestra resumen = valor min, máximo; mediana, moda; 1 y 3 quartil
 summary(positivas)
