@@ -4,11 +4,11 @@
 # install.packages("caret")
 # install.packages("e1071")
 # install.packages("plyr")
-#install.packages("magrittr") # Solo se necesita la primera vez que lo usas.
-#install.packages("dplyr")    # Instalación alternativa del%>%
+# install.packages("magrittr") # Solo se necesita la primera vez que lo usas.
+# install.packages("dplyr")    # Instalación alternativa del%>%
 # install.packages("wordcloud")
 # install.packages("RColorBrewer")
-#install.packages("ggplot2")
+# install.packages("ggplot2")
 
 library(tm) # para mineria de texto
 library(SnowballC) # para reducir una palabra a su raíz
@@ -24,15 +24,14 @@ library(ggplot2)
 
 # posicionamiento del directorio de trabajo
 
+setwd("D:/Estudios/UNAD/Trabajo de grado/Proyecto final/Proyecto R-Twitter/analisis_sentimientos/Interfaz_usuario/datos")
 
-setwd("D:/Estudios/UNAD/Trabajo de grado/Proyecto final/Proyecto R-Twitter/Dataset")
- 
 #retorna el directorio sobre el cual se esta trabajando
 
 getwd()
 
 
-importdata <- read.csv("Prueba2.csv", sep =";") #cargar los datos al objeto tweets ("nombre del archivo.csv", separador)
+importdata <- read.csv("Prueba1.csv", sep =";") #cargar los datos al objeto tweets ("nombre del archivo.csv", separador)
 
 table(importdata$sentiment) #Cuantos tweets positivos y negativos hay
 Corpus= Corpus(VectorSource(importdata$text)) #objeto corpus se le asigna el objeto de tweets // lee los tweets
@@ -51,7 +50,7 @@ content(Corpus[[50]]) #imprime la posicion 50
 
 
 Corpus <- tm_map(Corpus, PlainTextDocument)  # vuelve el corpus normal para poder visualizarlo
-#removeURL <- content_transformer(function(x) gsub("(f|ht)tp(s?)://\\S+", "", x, perl=T)) # funci?n para eliminar http
+removeURL <- content_transformer(function(x) gsub("(f|ht)tp(s?)://\\S+", "", x, perl=T)) # funci?n para eliminar http
 Corpus <- tm_map(Corpus, removeURL) # Elimina las palabras que empiezan por "http." seguidas de cualquier cosa que no sea un espacio)
 content(Corpus[[50]]) #imprime la posicion 50
 Corpus <- tm_map(Corpus, removePunctuation) #quita la puntuacion

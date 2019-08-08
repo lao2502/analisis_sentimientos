@@ -14,20 +14,48 @@ shinyUI(navbarPage(
   
   navbarMenu("Datos",
              
+             # Recopilar datos
              
              tabPanel("Recopilar datos",
+                     
+                      tags$h2("Establecer conexión"),
+                      sidebarPanel(
+                        tags$strong("Todos los campos son obligatorios"), 
+                         br(),
+                        tags$em(" *Ingrese datos de enlace con la app-twitter y clic en conectar*"),
+                        br(),
+                        br(),
+                        textInput("clave","Ingrese clave (consumer key)"),       
+                        textInput("secreta","Ingrese clave secreta (consumer secret)"),
+                        textInput("token","Ingrese token de acceso (token access)"),
+                        textInput("stoken","Ingrese token secreto de acceso (secret access)"),
                       
-                      tags$h1 ("Recopilación de datos"),
-                  
+                        actionButton("conectar", "Conectar Twitter"),
+                        
+                        #  Crear posición para el texto del lado del servidor
+                        
+                        textOutput("estado")
+                       
+                        
+                      ),
+                      
+                      
+                       tags$h2 ("Recopilación de datos"),
+                      
              # formulario para busqueda de datos
-             sidebarPanel(
+            
+              sidebarPanel(
                
-               textInput("busqueda","Ingrese palabras a buscar"),
+               tags$em("***Antes debe ingresar claves de acceso y conectar
+                       con la app de twitter***"),
+               
+               textInput("busqueda","Ingrese palabra a buscar"),
                actionButton("Buscar", "Buscar") 
                
              )
              ),
          
+             # Importar y analizar datos
          
               tabPanel("Analizar",
                   
@@ -46,19 +74,22 @@ shinyUI(navbarPage(
                        
                        #Crea boton para ejecutar analisis de datos
                        
-                       actionButton("analizar", label= "Ejecutar analisis")
+                       actionButton("analizar", label= "Ejecutar analisis"),
+                       
+                       #salida de texto estado de analisis de datos
+                       textOutput("analizar")
+                       
                                 ),
                      
+                     #  Crear posición para el texto del lado del servidor
                      
-                    
+                     
                      mainPanel(
                        tableOutput("contents")
                               )
                      
                      
                                 )
-                  
-                 
                   
                   )
              ),
@@ -111,14 +142,14 @@ shinyUI(navbarPage(
                               
                               
                               tabPanel("Ayuda",
-                                       h1("requieres apoyo?"),
+                                       h1("Solución de problemas y ayuda"),
                                        
                                        em('A continuacion usted encontrara los enlaces de apoyo:
 
                                           De click sobre la opcion que desee.'),
                                        
-                                       h4(HTML(paste("Documentacion", a(href="https://www.unad.edu.co/", "Clic aqui"), "."))),
-                                       h4(HTML(paste("Correo electrÃ³nico:", a(href="mailto:lao2502@hotmail.com", "enviar ahora"), ".")))
+                                       h4(HTML(paste("Documentación y problemas comunes", a(href="https://www.unad.edu.co/", "Ver")))),
+                                       h4(HTML(paste("Contacto:", a(href="mailto:lao2502@hotmail.com", "Comenzar"))))
                                        ),
                                        
                               tabPanel("Creditos", 
