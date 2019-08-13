@@ -6,17 +6,37 @@
 library(shiny)
 library(twitteR)
 library(ROAuth)
+library(httr)
 
-shinyServer(function(input, output, session) {
+shinyServer(function(input, output) {
     
   
-  # Crear acción cuando se hace clic en actionButton conectar
+  # Crear acción cuando se hace clic en actionButton conectar de conexion
   
-  
-  observeEvent(input$conectar,
+    observeEvent(input$conectar,
                
                
                {
+                 
+                 consumer_key <- input$clave
+                 consumer_secret <- input$secreta
+                 access_token <- input$token
+                 access_secret <- input$stoken
+                 
+                 output$estado <- renderText({
+                 if (is.null(consumer_key, consumer_secret,access_token, access_secret))
+                   return(NULL)
+                   
+                 })
+                 
+              
+                 
+                 setup_twitter_oauth(consumer_key, consumer_secret, access_token, access_secret)
+                 
+                 
+                 
+                 # imprime aviso tras completar el proceso anterior
+                 
                  output$estado = renderText("Conexión realizada")
                  
                }
@@ -24,33 +44,50 @@ shinyServer(function(input, output, session) {
                
                )
   
-  
-  # conexion a los datos de la api de twiter setup_twitter_oauth("consumer key", "consumer secret", "acces token", "acces token secret")
-  
-  
-  
-  # consumer_key <- "r51oIoQdGaKsN30Hx8TvmU5Z8"
-  # consumer_secret <- "eVB9Vw2qTqjB7PQ7RVGNCGLjz6UNam3nqbkviDEoYsvV1hVHDq"
-  # access_token <- "219743012-efZ5bpOckPPxIqr3TL1TBuEj0CYLvf9ynDZThY4E"
-  # access_secret <- "GVB3RzuGzK9tUiGHttiWpCJK1eKTn0L9eNuMwPngmcZr5"
-  # 
-  # conexion <- eventReactive(
-  #   input$conectar,{input$clave},{input$secreta},{input$token},{input$stoken})
-  # 
-  # 
-  # })
-  
-  #setup_twitter_oauth(clave, secreta, token, stoken)
-  
-  
    
-  # Recopilación de datos 
+  # Crea accion buscar para pestaña de Recopilación de datos 
   
-  palabra <- eventReactive(
-    input$Buscar,{input$busqueda})
-  etiqueta <- renderText({ palabra()
+  observeEvent( input$Buscar,
+                
+                  {
+                    #Establezco el directorio de trabajo
+                    
+                   setwd("D:/Estudios/UNAD/Trabajo de grado/Proyecto final/Proyecto R-Twitter/analisis_sentimientos/Interfaz_usuario/datos")
+                    
+                    
+                    palabra <-input$busqueda
+                  
+                    #Seleccionamos tweets o la busqueda a realizar 
+                    consulta <- searchTwitter(palabra, n=1000)
+                    
+                
+                     #Creando un dataset de los datos obtenidos 
+                  
+                  Lista=twitteR::twListToDF(consulta)
+                  
+                  
+                  #Exportando datos 
+                  
+                  write.csv(Lista, file="busqueda.csv",row.names = F)
+                  
+                  output$contents1 <- renderTable(
+                  
+                  Lista
 
-  })
+                  )
+                  output$Consulta = renderText("Proceso completado satisfactoriamente")
+                  
+                
+                  
+                  })
+  
+  
+                
+                  
+                
+
+
+ 
   
   # Ejecutar análisis de datos mediante evento clic del botón analizar (ejecutar analisis) 
   
@@ -80,22 +117,29 @@ shinyServer(function(input, output, session) {
         # contendra los nombres de archivos locales donde pueden
         #encontrarse los datos
         
-        inFile <- input$file1
+        indata <- input$file1
         
         #Establezco el directorio de trabajo
         
         setwd("D:/Estudios/UNAD/Trabajo de grado/Proyecto final/Proyecto R-Twitter/analisis_sentimientos/Interfaz_usuario/datos")
         
-        #Exportando datos 
         
-        write.csv(inFile, file="Prueba1.csv",row.names = F)
         
-        if (is.null(inFile))
+        if (is.null(indata))
             return(NULL)
         
-        read.csv(inFile$datapath, header = input$header)
+        dataup<- read.csv(indata$datapath, sep =";", header = input$header)
+       
+        output$contents <- renderTable(
+          
+          dataup
+        )
+      #Exportando datos 
+        write.csv(dataup, file="importado.csv", sep =";", row.names = F)
         
-      
+        
+        
+        
       })
 
     

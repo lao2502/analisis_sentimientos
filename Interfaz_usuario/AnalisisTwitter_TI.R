@@ -31,7 +31,7 @@ setwd("D:/Estudios/UNAD/Trabajo de grado/Proyecto final/Proyecto R-Twitter/anali
 getwd()
 
 
-importdata <- read.csv("Prueba1.csv", sep =";") #cargar los datos al objeto tweets ("nombre del archivo.csv", separador)
+importdata <- read.csv("importado.csv", sep =";") #cargar los datos al objeto tweets ("nombre del archivo.csv", separador)
 
 table(importdata$sentiment) #Cuantos tweets positivos y negativos hay
 Corpus= Corpus(VectorSource(importdata$text)) #objeto corpus se le asigna el objeto de tweets // lee los tweets
@@ -143,4 +143,5 @@ hist(positivas$frecuencia, main ="Frecuencia de palabras positivas", xlab = "Pal
 # Muestra resumen = valor min, máximo; mediana, moda; 1 y 3 quartil
 summary(positivas)
 # tweets_tidy %>%  ggplot(aes(x = Palabras)) + geom_bar() + coord_flip() + theme_bw() 
+
 
