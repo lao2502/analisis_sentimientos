@@ -4,39 +4,40 @@
 # install.packages("caret")
 # install.packages("e1071")
 # install.packages("plyr")
-# install.packages("magrittr") # Solo se necesita la primera vez que lo usas.
-# install.packages("dplyr")    # Instalación alternativa del%>%
+#install.packages("magrittr") # Solo se necesita la primera vez que lo usas.
+#install.packages("dplyr")    # Instalación alternativa del%>%
 # install.packages("wordcloud")
 # install.packages("RColorBrewer")
-# install.packages("ggplot2")
+#install.packages("ggplot2")
 
 library(tm) # para mineria de texto
 library(SnowballC) # para reducir una palabra a su raíz
-library(caTools) # Herramientas estadísticas de ventanas móviles, GIF, Base64, ROC AUC, etc.
+library(caTools) 
 library(caret) # ordenar datos
-library(e1071) # Paquete para machine learning (Aprendizaje de máquina)
-library(plyr) # Herramientas para dividir, aplicar y combinar datos
+library(e1071) # machine learning
+library(plyr)
 library(magrittr) # need to run every time you start R and want to use %>%
 library(dplyr)    # alternative, this also loads %>%
-library(wordcloud)# Crear nubes de palabras, visualizar diferencias y similitudes entre documentos.
-library(RColorBrewer)# Crea paletas de colores para aplicar a mapas temáticos y textos.
-library(ggplot2)# Paquete de visualización de datos. Crea gráficas
+library(wordcloud)
+library(RColorBrewer)
+library(ggplot2)
 
 # posicionamiento del directorio de trabajo
 
-setwd("D:/Estudios/UNAD/Trabajo de grado/Proyecto final/Proyecto R-Twitter/analisis_sentimientos/Interfaz_usuario/datos")
 
+setwd("D:/Estudios/UNAD/Trabajo de grado/Proyecto final/Proyecto R-Twitter/Dataset")
+ 
 #retorna el directorio sobre el cual se esta trabajando
 
 getwd()
 
 
-importdata <- read.csv("0.csv", sep =";") #cargar los datos al objeto tweets ("nombre del archivo.csv", separador)
+importdata <- read.csv("Prueba2.csv", sep =";") #cargar los datos al objeto tweets ("nombre del archivo.csv", separador)
 
 table(importdata$sentiment) #Cuantos tweets positivos y negativos hay
 Corpus= Corpus(VectorSource(importdata$text)) #objeto corpus se le asigna el objeto de tweets // lee los tweets
 length(Corpus) #cuenta las palabras tiene el corpus
-content(Corpus[[27]]) #imprime la posicion 27
+content(Corpus[[50]]) #imprime la posicion 50
 
 #Preprocesamiento
 
@@ -49,23 +50,23 @@ content(Corpus[[27]]) #imprime la posicion 27
 # Corpus <- tm_map(stemDocument(Corpus)) #acorta las palabras a su raiz "devolvieron" "devolver"
 
 
-#Corpus <- tm_map(Corpus, PlainTextDocument)  # vuelve el corpus normal para poder visualizarlo
-removeURL <- content_transformer(function(x) gsub("(f|ht)tp(s?)://\\S+", "", x, perl=T)) # funci?n para eliminar http
+Corpus <- tm_map(Corpus, PlainTextDocument)  # vuelve el corpus normal para poder visualizarlo
+#removeURL <- content_transformer(function(x) gsub("(f|ht)tp(s?)://\\S+", "", x, perl=T)) # funci?n para eliminar http
 Corpus <- tm_map(Corpus, removeURL) # Elimina las palabras que empiezan por "http." seguidas de cualquier cosa que no sea un espacio)
-content(Corpus[[27]]) #imprime la posicion 27
+content(Corpus[[50]]) #imprime la posicion 50
 Corpus <- tm_map(Corpus, removePunctuation) #quita la puntuacion
-content(Corpus[[27]]) #imprime la posicion 27
+content(Corpus[[50]]) #imprime la posicion 50
 Corpus <- tm_map(Corpus, removeNumbers) #quita los numeros
-content(Corpus[[27]]) #imprime la posicion 27
+content(Corpus[[50]]) #imprime la posicion 50
 Corpus <- tm_map(Corpus, content_transformer(tolower)) #procesamiento cambia las palabras a minusculas
-content(Corpus[[27]]) #imprime la posicion 27
+content(Corpus[[50]]) #imprime la posicion 50
 stopwords("spanish")[1:50] #preposiciones etc... [1:50] imprime las 50 primeras / stopwords("spanish")
-Corpus <- tm_map(Corpus, removeWords, c(stopwords("spanish"), "amp","leonesp", "barcelon","leon","hoy","reaiz" )) #remueve las stopwords y otras palabras que se deseen
-content(Corpus[[27]]) #imprime la posicion 27
+Corpus <- tm_map(Corpus, removeWords, c(stopwords("spanish"), "las", "tendencias")) #remueve las stopwords y otras palabras que se deseen
+content(Corpus[[50]]) #imprime la posicion 50
 Corpus <- tm_map(Corpus, stemDocument,language="spanish")  #acorta las palabras a su raiz "devolvieron" "devolver"
-content(Corpus[[27]]) #imprime la posicion 27
+content(Corpus[[50]]) #imprime la posicion 50
 Corpus <- tm_map(Corpus, stripWhitespace) #quita los espacios vacios excesivos
-content(Corpus[[27]]) #imprime la posicion 27
+content(Corpus[[50]]) #imprime la posicion 50
 
 #clasificaci?n
 
@@ -93,7 +94,7 @@ tweetsSparse$sentiment <- importdata$sentiment #examina con la base de datos de 
 
 set.seed(12)
 split <- sample.split(tweetsSparse$sentiment, SplitRatio = 0.8) #decide que observaciones se van para un lado u otro
-#splitRatio= 0.8 / el 80% se va a entrenamiento
+#plitRatio= 0.8 / el 805 se va a entrenamiento
 trainSparse = subset(tweetsSparse, split==TRUE) #particion modelo de entrenamiento
 TestSparse = subset(tweetsSparse, split==FALSE) #particion  modelo de evaluaci?n
 table(TestSparse$sentiment)
@@ -123,7 +124,7 @@ table(positivas)
 # library(wordcloud)
 # library("RColorBrewer")
 
-wordcloud(positivas$Palabras, positivas$frecuencia, random.order = FALSE, colors = brewer.pal(8,"Dark2"), max.words = 150)
+wordcloud(positivas$Palabras, positivas$frecuencia, random.order = FALSE, colors = brewer.pal(8,"Dark2"), max.words = 300)
 
 # Crear histograma de frecuencia de palabras
 
@@ -143,5 +144,4 @@ hist(positivas$frecuencia, main ="Frecuencia de palabras positivas", xlab = "Pal
 # Muestra resumen = valor min, máximo; mediana, moda; 1 y 3 quartil
 summary(positivas)
 # tweets_tidy %>%  ggplot(aes(x = Palabras)) + geom_bar() + coord_flip() + theme_bw() 
-
 

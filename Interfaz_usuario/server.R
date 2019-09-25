@@ -2,9 +2,9 @@
 # This is the server logic of a Shiny web application. You can run the
 # application by clicking 'Run App' above.
 #
-
-library(shiny)
-library(twitteR)
+library(rsconnect)
+library(shiny) # paquete R que facilita la creación de aplicaciones web interactivas
+library(twitteR)# paquete e R que proporciona acceso a la API de Twitter
 library(ROAuth)
 library(httr)
 
@@ -44,7 +44,8 @@ shinyServer(function(input, output) {
                
                )
   
-   
+  # MODULO RECOPILACION DE DATOS 
+  
   # Crea accion buscar para pestaña de Recopilación de datos 
   
   observeEvent( input$Buscar,
@@ -70,7 +71,7 @@ shinyServer(function(input, output) {
                   
                   write.csv(Lista, file="busqueda.csv",row.names = F)
                   
-                  output$contents1 <- renderTable(
+                  output$contenido <- renderTable(
                   
                   Lista
 
@@ -82,35 +83,18 @@ shinyServer(function(input, output) {
                   })
   
   
-                
-                  
-                
-
-
- 
+            
+  #Establezco el directorio de trabajo
   
-  # Ejecutar análisis de datos mediante evento clic del botón analizar (ejecutar analisis) 
+  setwd("D:/Estudios/UNAD/Trabajo de grado/Proyecto final/Proyecto R-Twitter/analisis_sentimientos/Interfaz_usuario/datos")
   
-  observeEvent( input$analizar,
-                
-                {
-                  setwd("D:/Estudios/UNAD/Trabajo de grado/Proyecto final/Proyecto R-Twitter/analisis_sentimientos/Interfaz_usuario")
-                 
-                  source("AnalisisTwitter_TI.R") 
-                  
-                  # imprime aviso tras completar el proceso anterior
-                  output$analizar = renderText("Proceso completado satisfactoriamente")
-                  
-                }
-                
-               
-  )
   
-    
-   
+  # MODULO ANALISIS DE DATOS 
+  
+  
   # Importación y análisis de datos
   
-    output$contents <- renderTable({
+    output$fileload <- renderTable({
         # input $ file1 sera NULL inicialmente. Despues de que el usuario seleccione
         # y cargue un archivo, este sera un dataframe con columnas "nombre",
         # "tamano", "tipo" y "ruta de datos". La columna 'ruta de datos'
@@ -119,43 +103,54 @@ shinyServer(function(input, output) {
         
         indata <- input$file1
         
-        #Establezco el directorio de trabajo
-        
-        setwd("D:/Estudios/UNAD/Trabajo de grado/Proyecto final/Proyecto R-Twitter/analisis_sentimientos/Interfaz_usuario/datos")
-        
-        
-        
         if (is.null(indata))
             return(NULL)
         
-        dataup<- read.csv(indata$datapath, sep =";", header = input$header)
+        datafile<- input$file1$datapath
+        
+        
+        dataup<- read.csv ( datafile,header = input$header,sep = input$sep,quote = input$quote)
+        
        
-        output$contents <- renderTable(
-          
-          dataup
-        )
-      #Exportando datos 
-        write.csv(dataup, file="importado.csv", sep =";", row.names = F)
         
+
+        # Exportando datos 
+         
         
+        file.copy(indata, "D:/Estudios/UNAD/Trabajo de grado/Proyecto final/Proyecto R-Twitter/analisis_sentimientos/Interfaz_usuario/datos"
+  , overwrite = TRUE) 
         
-        
-      })
+    
+    output$fileload <- renderTable(
+      dataup
+    )
 
     
+        
+      })
+    
+    # RESULTADOS Y GRAFICOS 
+    
+    # Ejecutar análisis de datos mediante evento clic del botón analizar (ejecutar analisis) 
+    
+    observeEvent( input$analizar,
+                  
+                  {
+                    setwd("D:/Estudios/UNAD/Trabajo de grado/Proyecto final/Proyecto R-Twitter/analisis_sentimientos/Interfaz_usuario")
+                    
+                    source("AnalisisTwitter_TI.R") 
+                    
+                    # imprime aviso tras completar el proceso anterior
+                    output$analizar = renderText("Proceso completado satisfactoriamente")
+                    
+                  }
+                  
+                  
+    )
     
     
     
-    
-    
-    # {
-    #   
-    #   # Puede acceder al valor del widget con input$action, por ejemplo
-    #   output$value <- renderPrint({ input$analizar })
-    #   
-    # }
-    
-    # para mostrar los datos de frecuencias positivas en la pagina "frecuencias"
+   # para mostrar los datos de frecuencias positivas en la pagina "frecuencias"
     output$datafrec <- renderTable({
         positivas
     })

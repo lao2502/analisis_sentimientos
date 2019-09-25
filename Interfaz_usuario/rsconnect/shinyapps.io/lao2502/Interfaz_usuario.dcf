@@ -1,0 +1,12 @@
+name: Interfaz_usuario
+title: Interfaz_usuario
+username:
+account: lao2502
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 1131132
+bundleId: 2371360
+url: https://lao2502.shinyapps.io/Interfaz_usuario/
+when: 1567177974.87087
+asMultiple: FALSE
+asStatic: FALSE

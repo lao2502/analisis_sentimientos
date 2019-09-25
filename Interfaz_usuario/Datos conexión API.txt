@@ -1,0 +1,4 @@
+consumer_key <- r51oIoQdGaKsN30Hx8TvmU5Z8
+consumer_secret <- eVB9Vw2qTqjB7PQ7RVGNCGLjz6UNam3nqbkviDEoYsvV1hVHDq
+access_token <- 219743012-efZ5bpOckPPxIqr3TL1TBuEj0CYLvf9ynDZThY4E
+access_secret <- GVB3RzuGzK9tUiGHttiWpCJK1eKTn0L9eNuMwPngmcZr5

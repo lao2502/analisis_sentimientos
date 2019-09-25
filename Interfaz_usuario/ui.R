@@ -66,7 +66,7 @@ font-style: italic;}"
                           textOutput("Consulta")
                         ),
                         mainPanel(
-                          tableOutput("contents1")  
+                          tableOutput("contenido")  
                         )
                         
                ),
@@ -75,6 +75,7 @@ font-style: italic;}"
                tabPanel("Analizar",
                         
                         tags$h1 ("Manejo de datos"), 
+                        
                         # Widget para carga de datos externos formato csv          
                         sidebarLayout(
                           sidebarPanel(
@@ -85,6 +86,30 @@ font-style: italic;}"
                                         ".csv")
                             ),
                             tags$br(),
+                            
+                            radioButtons(
+                              "sep", "Separador",
+                              choices = c(
+                                "Coma" = ",",
+                                "Punto y coma" = ";",
+                                "Tabulacion" = "\t"
+                              ),
+                              
+                              selected = ";"
+                            ),
+                            tags$br(),
+                            radioButtons(
+                              "quote", "Comillas",
+                              choices = c(
+                                "Ninguna" = "",
+                                "Comilla doble" = '"',
+                                "Comilla sencilla" = "'"
+                              ),
+                              selected = ''
+                            ),
+                            tags$br(),
+                            
+                            
                             checkboxInput("header", "Encabezados", TRUE),
                             
                             #Crea boton para ejecutar analisis de datos
@@ -100,7 +125,7 @@ font-style: italic;}"
                           
                           
                           mainPanel(
-                            tableOutput("contents")
+                            tableOutput("fileload")
                           )
                           
                           
